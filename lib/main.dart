@@ -1,12 +1,38 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 
 void main() {
   runApp(const MainApp());
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
+  @override
+  State<MainApp> createState() => MainAppState();
+}
+
+class MainAppState extends State<MainApp> { 
+  String quote = "Nach der Erschwernis kommt die Erleichterung."; // immer das erste Zitat
+  String author = "Unbekannt";    // immer der erste Autor
+  Future<void>getQuote() async {  // das ist die Funktion, die die Zitate von der API holt
+    final response = await
+    http.get(Uri.parse("https://api.api-ninjas.com/v1/quotes"), // das ist die API von der die Zitate geholt werden
+    headers: {
+      "x-Api-Key": '58QgRFpoOdfVqr3FiNrNVw==khlnt3f6pa729CBM'}// mwin API Key
+    );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+            setState(() {
+        quote = data[0]["quote"]; 
+        author = data[0]["author"];
+      }
+     );
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -23,7 +49,7 @@ class MainApp extends StatelessWidget {
                 ),
               ),
             ),
-            title: const Text("Poesie",
+            title: const Text("Zitat",
             style: TextStyle(
               fontSize: 50,
               fontWeight: FontWeight.w900,
@@ -35,30 +61,47 @@ class MainApp extends StatelessWidget {
         ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Center(
-              child: Text("Nach der Erschwernis kommt die Erleichterung.",
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: 
+          [
+            const SizedBox(height: 170),
+             Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(quote, // Zitat
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w400,
+                  color: Color.fromARGB(255, 219, 210, 210),
+                  fontStyle: FontStyle.italic,
+                ),
+                ),
+              ),
+            ),
+              const SizedBox(height: 20), 
+               Text("- $author", // author
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
                 color: Color.fromARGB(255, 219, 210, 210),
                 fontStyle: FontStyle.italic,
               ),
               ),
-            ),
-              const SizedBox(height: 20), 
+              const Expanded(child: SizedBox()),
               ElevatedButton(
-                onPressed: () {},
-              child: const Text("weiter",
+                onPressed: getQuote,
+              child: const Text("next",
               style: TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 color: Colors.black,
                 fontStyle: FontStyle.italic,
               ),
               ),
             ),
+            const SizedBox(height: 180), 
           ],
         ),
       ),
